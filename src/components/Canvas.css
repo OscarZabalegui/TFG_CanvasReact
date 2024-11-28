@@ -1,0 +1,16 @@
+.dropdown-container {
+  margin: 20px;
+  padding: 10px;
+  display: flex;
+  flex-direction: row; /* Alineación horizontal */
+  align-items: center; /* Alinea verticalmente */
+}
+
+h3 {
+  margin-right: 10px; /* Espacio entre el título y los selects */
+}
+
+select {
+  margin-right: 20px;
+}
+

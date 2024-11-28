@@ -89,7 +89,7 @@ const TextureContent = ({ selectedTexture }) => {
   // Llamar useTexture dentro de un componente interno
   const brickTexture = useTexture('/assets/textures/Bricks097_1K-JPG_Color.jpg');
   const woodTexture = useTexture('/assets/textures/Wood048_1K-JPG_Color.jpg');
-  const pruebaTexture = useTexture('/assets/textures/182px-GGST_Slayer_6H_1.jfif')
+  const pruebaTexture = useTexture('/assets/textures/prueba.jfif')
   // Mapeo de las texturas
   const textureMap = {
     none: null,

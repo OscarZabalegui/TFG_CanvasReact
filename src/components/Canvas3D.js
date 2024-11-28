@@ -1,12 +1,14 @@
 // src/components/Canvas3D.js
 import React, { useState } from 'react';
 import { Canvas } from '@react-three/fiber';
-import { Edges, OrbitControls } from '@react-three/drei';
+import { OrbitControls, useTexture } from '@react-three/drei'; // Edges para mostrar los bordes pero por ahora no lo usare
 
 const Canvas3D = () => {
   const [selectedColor, setSelectedColor] = useState('blue');
   const [selectedShape, setSelectedShape] = useState('sphere');
   const [size, setSize] = useState(2); // Tamaño inicial predeterminado
+  const [selectedTexture, setSelectedTexture] = useState('none');
+
   return (
     <div style={{ width: '700px', height: '700px' }}>
       <h3>Selecciona la figura:</h3>
@@ -35,22 +37,34 @@ const Canvas3D = () => {
         <option value="purple">Morado</option>
       </select>
 
-      <Canvas gl={{ antialias: true }} camera={{ position: [0, 0, 5] }}  style={{ background: "grey" }}>
+      <h3>Selecciona la textura:</h3>
+      <select value={selectedTexture} onChange={(e) => setSelectedTexture(e.target.value)}>
+        <option value="none">Ninguna</option>
+        <option value="wood">Madera</option>
+        <option value="brick">Ladrillo</option>
+        <option value="prueba">Prueba</option>
+      </select>
+
+      <Canvas gl={{ antialias: true }} camera={{ position: [0, 0, 5] }} style={{ background: "grey" }}>
         <mesh rotation={[Math.PI / 4, Math.PI / 4, 0]}> {/* Rotación en dos ejes */}
+          {/* Cargar texturas condicionalmente */}
+          {selectedTexture !== 'none' && (
+            <TextureContent selectedTexture={selectedTexture} />
+          )}
 
-        {/* Suelo */}
-        <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, -2, 0]}>
-          <planeGeometry args={[20, 20]} />
-          <meshStandardMaterial color="gray" />
-        </mesh>
+          {/* Suelo */}
+          <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, -2, 0]}>
+            <planeGeometry args={[20, 20]} />
+            <meshStandardMaterial color="gray" />
+          </mesh>
 
-        {/* Renderizar la geometría basada en selectedShape */} {/* Iba a hacerlo con switches pero JSX no lo soporta */}
-        {selectedShape === 'sphere' && <sphereGeometry args={[size, 12, 32]} />}
+          {/* Renderizar la geometría basada en selectedShape */} {/* Iba a hacerlo con switches pero JSX no lo soporta */}
+          {selectedShape === 'sphere' && <sphereGeometry args={[size, 12, 32]} />}
           {selectedShape === 'cube' && <boxGeometry args={[size, size, size]} />}
           {selectedShape === 'cone' && <coneGeometry args={[size, size * 1.5, 32]} />}
           {selectedShape === 'cylinder' && <cylinderGeometry args={[size, size, size * 1.5, 32]} />}
           {selectedShape === 'torus' && <torusGeometry args={[size, size * 0.4, 16, 100]} />}
-          
+
           {/* Aplicar el color seleccionado */}
           <meshStandardMaterial color={selectedColor} />
           <ambientLight intensity={1} />
@@ -64,11 +78,27 @@ const Canvas3D = () => {
           />
           */}
           {/* Controles de cámara */}
-        <OrbitControls />
+          <OrbitControls />
         </mesh>
       </Canvas>
     </div>
   );
+};
+
+const TextureContent = ({ selectedTexture }) => {
+  // Llamar useTexture dentro de un componente interno
+  const brickTexture = useTexture('/assets/textures/Bricks097_1K-JPG_Color.jpg');
+  const woodTexture = useTexture('/assets/textures/Wood048_1K-JPG_Color.jpg');
+  const pruebaTexture = useTexture('/assets/textures/182px-GGST_Slayer_6H_1.jfif')
+  // Mapeo de las texturas
+  const textureMap = {
+    none: null,
+    wood: woodTexture,
+    brick: brickTexture,
+    prueba: pruebaTexture
+  };
+
+  return <meshStandardMaterial map={textureMap[selectedTexture]} />;
 };
 
 export default Canvas3D;

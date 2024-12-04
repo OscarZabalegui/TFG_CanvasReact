@@ -1,1 +1,1 @@
-Conseguir q la esfera se vea en 3d y que se vea en su recuadro
+Que color/tamaño/figura utiliza mas, cuanto tiempo arrastra el raton, coordenadas entre clic inicial y final para calcular distancias y patrones,

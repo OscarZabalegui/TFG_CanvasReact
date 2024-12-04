@@ -2,9 +2,10 @@
 import React, { useState } from 'react';
 import { Canvas } from '@react-three/fiber';
 import { OrbitControls, useTexture } from '@react-three/drei'; // Edges para mostrar los bordes pero por ahora no lo usare
+import { SliderPicker} from 'react-color'; // Seleccion interactiva
 
 const Canvas3D = () => {
-  const [selectedColor, setSelectedColor] = useState('blue');
+  const [selectedColor, setSelectedColor] = useState('#ff0000'); // Inicial en rojo
   const [selectedShape, setSelectedShape] = useState('sphere');
   const [size, setSize] = useState(2); // Tamaño inicial predeterminado
   const [selectedTexture, setSelectedTexture] = useState('none');
@@ -25,17 +26,11 @@ const Canvas3D = () => {
         type="number"
         value={size}
         onChange={(e) => setSize(Number(e.target.value))}
-        min="0.1" // Valor mínimo permitido
-        step="0.1" // Incrementos pequeños para mayor precisión
+        min="0.1" // Valor mínimo 
+        step="0.1" // Incrementos de 1 a 1
       />
 
-      <h3>Selecciona el color:</h3>
-      <select value={selectedColor} onChange={(e) => setSelectedColor(e.target.value)}>
-        <option value="blue">Azul</option>
-        <option value="red">Rojo</option>
-        <option value="green">Verde</option>
-        <option value="purple">Morado</option>
-      </select>
+      <ColorPicker onColorChange={setSelectedColor} selectedColor={selectedColor}/>
 
       <h3>Selecciona la textura:</h3>
       <select value={selectedTexture} onChange={(e) => setSelectedTexture(e.target.value)}>
@@ -100,6 +95,23 @@ const TextureContent = ({ selectedTexture }) => {
 
   return <meshStandardMaterial map={textureMap[selectedTexture]} />;
 };
+
+const ColorPicker = ({ onColorChange, selectedColor }) => {
+  const handleChangeComplete = (color) => {
+    onColorChange(color.hex); // Actualiza el color seleccionado
+  };
+
+  return (
+    <div>
+      <h4>Selecciona el color y la saturación:</h4>
+      <SliderPicker 
+        color={selectedColor} // Vincula el color actual
+        onChange={handleChangeComplete} 
+      />
+    </div>
+  );
+};
+
 
 export default Canvas3D;
 

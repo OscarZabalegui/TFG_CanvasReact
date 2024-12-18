@@ -1,16 +1,54 @@
-.dropdown-container {
-  margin: 20px;
-  padding: 10px;
+.canvas-container {
   display: flex;
-  flex-direction: row; /* Alineación horizontal */
-  align-items: center; /* Alinea verticalmente */
+  height: 100vh;
 }
 
-h3 {
-  margin-right: 10px; /* Espacio entre el título y los selects */
+.controls-container {
+  width: 20%;
+  padding: 10px;
+  background-color: #f0f0f0;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
 }
 
-select {
-  margin-right: 20px;
+.big-button {
+  padding: 20px;
+  font-size: 18px;
+  cursor: pointer;
+  background-color: #007bff;
+  color: white;
+  border: none;
+  border-radius: 5px;
 }
 
+.big-button:hover {
+  background-color: #0056b3;
+}
+
+.selected-button {
+  background-color: black;
+  color: white;
+}
+
+.selected-button2 {
+  background-color: #0b315b; /* Azul brillante */
+  color: white; /* Texto en blanco */
+}
+
+.options-panel {
+  margin-top: 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.dropdown-options {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.canvas-wrapper {
+  flex-grow: 1;
+}

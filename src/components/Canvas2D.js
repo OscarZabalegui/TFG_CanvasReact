@@ -270,6 +270,7 @@ const Canvas2D = () => {
     }));
   };
 
+  // Cogido de https://www.youtube.com/watch?v=cw8QDjROUTw
   const drawPolygon = (p5, x, y, n, radius) => {
 
     p5.beginShape();

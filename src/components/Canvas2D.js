@@ -1,6 +1,7 @@
-import React, { useState } from "react";
+import React, { useState, useCallback } from "react";
 import { ChromePicker, SliderPicker } from 'react-color'; // Seleccion interactiva
 import Sketch from "react-p5";
+import HandPoseDetector from "./HandPoseDetector"; // Asegúrate de importar tu detector
 import "./Canvas.css";
 
 const Canvas2D = () => {
@@ -13,6 +14,8 @@ const Canvas2D = () => {
   const [showColorPicker, setShowColorPicker] = useState(false);
   const [showShapeOptions, setShowShapeOptions] = useState(false);
   const [showSizeOptions, setShowSizeOptions] = useState(false);
+  const [handPosition, setHandPosition] = useState(null);
+  const [lastGestureTime, setLastGestureTime] = useState(0);
   const [userMetrics, setUserMetrics] = useState({
     figuresUsed: {}, // {"triangle": 3, "circle": 2}
     colorsUsed: {}, // {"#ff0000": 4, "#00ff00": 1}
@@ -23,13 +26,18 @@ const Canvas2D = () => {
     currentDragCoords: null, // Coordenadas iniciales del arrastre
   });
 
+
   const setup = (p5, canvasParentRef) => {
-    p5.createCanvas(735, 735).parent(canvasParentRef);
+    p5.createCanvas(640, 480).parent(canvasParentRef);
   };
 
   const draw = (p5) => {
     p5.background(200);
     // Dibujar todas las figuras
+    if (handPosition) {
+      p5.fill(0, 255, 0);
+      p5.ellipse(handPosition.x, handPosition.y, 10, 10); // Punto verde en la mano
+    }
     shapes.forEach(({ type, x, y, color, size }) => {
       p5.fill(color);
       switch (type) {
@@ -224,6 +232,43 @@ const Canvas2D = () => {
   };
 
 
+  const handleHandMove = useCallback((x, y) => {
+    // Actualiza la posición solo si hay un cambio significativo
+    setHandPosition(prev => {
+      if (!prev || Math.abs(prev.x - x) > 5 || Math.abs(prev.y - y) > 5) {
+        return { x, y };
+      }
+      return prev;
+    });
+  
+    if (selectedFigure !== null) {
+      setShapes(prevShapes => {
+        const newShapes = [...prevShapes];
+        newShapes[selectedFigure] = { 
+          ...newShapes[selectedFigure], 
+          x, 
+          y 
+        };
+        return newShapes;
+      });
+    }
+  }, [selectedFigure]); // Dependencias del useCallback
+
+  const handleHandClick = (x, y) => {
+    const clickedIndex = shapes.findIndex(({ x: sx, y: sy, size }) =>
+      Math.sqrt(Math.pow(sx - x, 2) + Math.pow(sy - y, 2)) < size / 2
+    );
+
+    if (clickedIndex !== -1) {
+      setSelectedFigure(clickedIndex);
+    } else {
+      setShapes((prev) => [...prev, { type: selectedShape, x, y, color: selectedColor, size: selectedSize }]);
+      updateFigureMetrics();
+    }
+  };
+
+
+
 
   const mouseReleased = (p5) => {
     if (mode === "move" && userMetrics.currentDragStart && userMetrics.currentDragCoords) { // Si es el modo mover y las variables han sido inicializadas
@@ -280,6 +325,42 @@ const Canvas2D = () => {
     p5.endShape(p5.CLOSE);
   };
 
+  const handleGesture = (gestureType, position) => {
+    const now = Date.now();
+    // Evita gestos demasiado seguidos (500ms de cooldown)
+    if (now - lastGestureTime < 500) return;
+
+    setLastGestureTime(now);
+
+    if (gestureType === 'pinch') {
+      setShapes((prev) => [
+        ...prev,
+        {
+          type: "triangle",
+          x: position.x,
+          y: position.y,
+          color: selectedColor,
+          size: selectedSize
+        },
+      ]);
+
+      setUserMetrics((prev) => ({
+        ...prev,
+        figuresUsed: {
+          ...prev.figuresUsed,
+          triangle: (prev.figuresUsed.triangle || 0) + 1,
+        },
+        colorsUsed: {
+          ...prev.colorsUsed,
+          [selectedColor]: (prev.colorsUsed[selectedColor] || 0) + 1,
+        },
+        sizesUsed: {
+          ...prev.sizesUsed,
+          [selectedSize]: (prev.sizesUsed[selectedSize] || 0) + 1,
+        },
+      }));
+    }
+  };
 
 
   return (
@@ -374,12 +455,20 @@ const Canvas2D = () => {
         <button className={`big-button ${mode === "select" ? "selected-button2" : ""}`} onClick={() => handleModeChange("select")}>
           Seleccionar
         </button>
+
+
       </div>
+      {/* Agregar la detección de mano */}
+      <HandPoseDetector
+        onHandMove={handleHandMove}
+        onHandClick={handleHandClick}
+        onGesture={handleGesture} // Nueva prop
+      />
 
       <div className="canvas-wrapper">
         <Sketch
           setup={setup}
-          draw={draw}
+          draw={(p) => draw(p, handPosition)}  // Pasamos la posición de la mano
           mousePressed={mousePressed}
           mouseDragged={mouseDragged}
           mouseReleased={mouseReleased}
